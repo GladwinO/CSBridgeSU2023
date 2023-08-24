@@ -16,10 +16,10 @@ int main()
         << "Friday = 5\nSaturday = 6\nSunday = 7\nEnter your number: ";
     std::cin >> startingDayInt;
 
-    lastDayOfMonth = printMonthCalender(31, 4);
+    lastDayOfMonth = printMonthCalender(numOfDaysInt, startingDayInt);
     std::cout << "\n" << lastDayOfMonth;
 
-    
+
 }
 
 int printMonthCalender(int numOfDays, int startingDay) {
@@ -53,7 +53,7 @@ int printMonthCalender(int numOfDays, int startingDay) {
         std::cout << "Incorrect number entered.\n";
         break;
     }
-    
+
     std::cout << "Mon\tTue\tWed\tThr\tFri\tSat\tSun\n";
     for (int i = 0; i < initNumTabsInt; i++) {
         std::cout << "\t";
@@ -64,7 +64,7 @@ int printMonthCalender(int numOfDays, int startingDay) {
             std::cout << "\n";
         }
         daysInTheWeekInt++;
-        
+
         if (i > 1) {
             if (dayOfWeekInt <= numDaysInWeek) {
                 dayOfWeekInt++;
@@ -73,15 +73,15 @@ int printMonthCalender(int numOfDays, int startingDay) {
                 dayOfWeekInt = 1;
             }
         }
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
     }
 
-   
-    
-    return dayOfWeekInt - 1;
+
+
+    return dayOfWeekInt;
 }
