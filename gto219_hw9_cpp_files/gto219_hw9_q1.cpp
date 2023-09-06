@@ -35,7 +35,7 @@ void makeStrLowerCase(std::string userString, std::vector<char>& orgVec) {
     int userStrSize = userString.size();
     for (int i = 0; i < userStrSize; i++) {
         orgVec.push_back((char)tolower(userString[i]));
-        //std::cout << orgVec[i];
+        
     }
 }
 
