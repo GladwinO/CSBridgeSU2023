@@ -2,70 +2,68 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
-//std::string* createWordsArray(std::string sentence, int& outWordsArrSize);
-//int numSpaceFinder(std::string sentence);
-void spaceLocator(std::string sentence, int*& spaceLocArr, int& numSpaces);
+std::string* createWordsArray(std::string sentence, int& outWordsArrSize);
+
 
 int main()
 {
     std::string userStr;
-    int* spaceLocArr = nullptr;
-    int numSpaces;
+    std::string* userStrArr;
+    int wordArrSize;
+   
     std::cout << "Please enter a sentence without punctuation:\n";
     std::getline(std::cin, userStr);
-    spaceLocator(userStr, spaceLocArr, numSpaces);
-    /*std::cout << numSpaces << std::endl;
+ 
 
-    for (int i = 0; i < numSpaces; i++) {
-        std::cout << spaceLocArr[i] << " ";
-    }*/
+    userStrArr = createWordsArray(userStr, wordArrSize);
+    std::cout << "[ ";
+    for (int i = 0; i < wordArrSize; i++) {
+        std::cout << userStrArr[i] << ", ";
+    }
+    std::cout << "]";
+
+
+    delete[] userStrArr;
+
+    return 0;
 }
 
 std::string* createWordsArray(std::string sentence, int& outWordsArrSize) {
     size_t spaceLoc = 0;
     std::string subString = " ";
-    int startSearchPos = 0;
-    int posNumWords = 0;
+    int numSpaces = 0, wordStartPos = 0;
+    int strStartPos = 0, curWordLen = 0;
+    std::vector<int> spaceLocVec;
     
-    std::string* wordArray = new std::string[posNumWords];
-
-    /*while (spaceLoc != std::string::npos) {
+    /*this call to the find method outside the while loop sets the code up so spaceLocVec does not
+    take in the integer representation of std::string:npos if a space is not found */
+    spaceLoc = sentence.find(subString, spaceLoc);
+    while (spaceLoc != std::string::npos) {
+        spaceLocVec.push_back(spaceLoc);
+        spaceLoc++;
         spaceLoc = sentence.find(subString, spaceLoc);
-        spaceLoc++;8
-    }*/
- 
+    }
+
+    numSpaces = spaceLocVec.size();
+    //this code assumes that every word is spaced correctly from the next
+    outWordsArrSize = numSpaces + 1;
+    std::string* wordArray = new std::string[outWordsArrSize];
+    for (int i = 0; i < outWordsArrSize; i++) {
+        if (i == 0) {
+            wordArray[i] = sentence.substr(strStartPos, spaceLocVec[i]);
+        }
+        else if (i < numSpaces) {
+            wordStartPos = spaceLocVec[i - 1] + 1;
+            curWordLen = spaceLocVec[i] - wordStartPos;
+            wordArray[i] = sentence.substr(wordStartPos, curWordLen);
+        }
+        else {
+            wordStartPos = spaceLocVec[i - 1] + 1;
+            wordArray[i] = sentence.substr(wordStartPos);
+        }
+    }
+
+    return wordArray;
 }
-
-
-
-void spaceLocator(std::string sentence, int*& spaceLocator, int& numSpaces) {
-    int sentSize = sentence.size();
-    int spacLocArrInd = 0;
-    
-    numSpaces = 0;
-    for (int i = 0; i < sentSize; i++) {
-        if (sentence[i] == ' ') {
-            numSpaces++;
-        }
-    }
-    spaceLocator = new int[numSpaces];
-   
-    for (int j = 0; j < sentSize; j++) {
-        if (sentence[j] == ' ') {
-            spaceLocator[spacLocArrInd] = j;
-            spacLocArrInd++;
-        }
-    }
-}
-
-/*int numSpaceFinder(std::string sentence) {
-    int stringSize = sentence.size();
-    int numSpaces = 0;
-    for (int i = 0; i < stringSize; i++) {
-        if (sentence[i] == ' ') {
-            numSpaces++;
-        }
-    }
-    return numSpaces;
-}*/
