@@ -25,6 +25,7 @@ int main()
         std::cout << missingNumArr[i] << " ";
     }
 
+    delete[] missingNumArr;
 
     
 }
