@@ -11,7 +11,7 @@ int main()
     int leastJumpsCost;
     createJumpItArrayPtr(userArr, arrSize);
     leastJumpsCost = lowestCostJumps(userArr, arrSize);
-    std::cout << leastJumpsCost;
+    std::cout << "The lowest cost path through this Jump It game is " << leastJumpsCost;
 
 
     delete[] userArr;
