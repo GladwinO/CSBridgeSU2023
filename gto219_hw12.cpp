@@ -48,7 +48,6 @@ public:
 
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////// Check Class Declarations /////////////////////////////////////////////////////////
 class Check {
@@ -100,162 +99,6 @@ double totalAmount(double* depositArr, const int& size); //Takes double array po
 void leastToGreatest(Check*& checkList, const int& size);
 
 void checkListPrint(Check* checkList, const int& size);
-
-
-
-
-
-////////////////////////////// Temporary Location of Class Definitions and non-member functions /////////////////////////////////
-
-Check::Check(double userAmount) : num(0), amount(userAmount), isCashed(false) {
-    if (userAmount <= 0) { //a check with 0 amount should be tossed
-        std::cout << "An incorrect check amount was entered." << std::endl;
-        std::exit(1);
-    }
-}
-
-Check::Check(int checkNum, double userAmount) : num(checkNum), amount(userAmount), isCashed(false) {
-
-    if (checkNum < 0) { //checks less than 0 do not exist
-        std::cout << "An incorrect check number was entered." << std::endl;
-        std::exit(1);
-    }
-    else if (userAmount <= 0) {//a check with 0 amount should be tossed
-        std::cout << "An incorrect check amount was entered." << std::endl;
-        std::exit(1);
-    }
-
-}
-
-Check::Check(int checkNum, double userAmount, bool userCashed) : num(checkNum), amount(userAmount), isCashed(userCashed) {
-
-    if (checkNum < 0) { //checks less than 0 do not exist
-        std::cout << "An incorrect check number was entered." << std::endl;
-        std::exit(1);
-    }
-    else if (userAmount <= 0) {//a check with 0 amount should be tossed
-        std::cout << "An incorrect check amount was entered." << std::endl;
-        std::exit(1);
-    }
-
-}
-
-
-int Check::get_num() {
-    return num;
-}
-double Check::get_amount() {
-    return amount.get_value();
-    //returns double value. the true value is stored as an int and returning the money data type would not return the amount but the object
-}
-bool Check::get_isCashed() {
-    return isCashed;
-}
-void Check::set_num(const int& userNum) {
-    num = userNum;
-}
-void Check::set_amount(const double& userAmount) {
-    Money newAmount(userAmount);
-    amount = newAmount;
-}
-void Check::set_isCashed(const bool& userCashed) {
-    isCashed = userCashed;
-}
-
-std::istream& operator >>(std::istream& ins, Check& checkInfo) {
-    int checkNum = 0;
-    double checkAmount = 0.0;
-    bool checkCashed = false;
-    ins >> checkNum;
-    if (checkNum < -1) { // a checkNum of -1 signifies the end of creating an array of checks.
-        std::cout << "An incorrect check number was entered." << std::endl;
-        std::exit(1);
-    }
-    checkInfo.num = checkNum;
-    ins >> checkAmount;
-    if (checkAmount <= 0) {
-        std::cout << "An incorrect check amount was entered." << std::endl;
-        std::exit(1);
-    }
-    Money temp(checkAmount);
-    checkInfo.amount = temp; //why cant i do checkInfo.amount(checkAmount)?
-    ins >> checkCashed;
-    if (checkCashed != 1 && checkCashed != 0) {
-        std::cout << "An incorrect input was entered." << std::endl;
-        std::exit(1);
-    }
-    checkInfo.isCashed = checkCashed;
-
-
-
-    return ins;
-}
-
-std::ostream& operator <<(std::ostream& out, const Check& checkInfo) {
-    out << "Check number: " << checkInfo.num << " Check amount $" << checkInfo.amount.get_value() <<
-        " Check cashed: ";
-    if (checkInfo.isCashed == true) {
-        out << "Yes";
-    }
-    else {
-        out << "No";
-    }
-    return out;
-}
-
-bool operator <=(const Check& checkInfo1, const Check& checkInfo2) {
-    if (checkInfo1.num <= checkInfo2.num) {
-        return true;
-    }
-    return false;
-}
-
-bool operator <(const Check& checkInfo1, const Check& checkInfo2) {
-    if (checkInfo1.num < checkInfo2.num) {
-        return true;
-    }
-    return false;
-}
-
-bool operator >(const Check& checkInfo1, const Check& checkInfo2) {
-    if (checkInfo1.num > checkInfo2.num) {
-        return true;
-    }
-    return false;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 int main()
@@ -423,27 +266,127 @@ std::ostream& operator <<(std::ostream& outs, const Money& amount) {
 
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 ////////////////////////////////////// Check Class Member Definitions and non-member functions ////////////////////////////////////////
 
 
+Check::Check(double userAmount) : num(0), amount(userAmount), isCashed(false) {
+    if (userAmount <= 0) { //a check with 0 amount should be tossed
+        std::cout << "An incorrect check amount was entered." << std::endl;
+        std::exit(1);
+    }
+}
+
+Check::Check(int checkNum, double userAmount) : num(checkNum), amount(userAmount), isCashed(false) {
+
+    if (checkNum < 0) { //checks less than 0 do not exist
+        std::cout << "An incorrect check number was entered." << std::endl;
+        std::exit(1);
+    }
+    else if (userAmount <= 0) {//a check with 0 amount should be tossed
+        std::cout << "An incorrect check amount was entered." << std::endl;
+        std::exit(1);
+    }
+
+}
+
+Check::Check(int checkNum, double userAmount, bool userCashed) : num(checkNum), amount(userAmount), isCashed(userCashed) {
+
+    if (checkNum < 0) { //checks less than 0 do not exist
+        std::cout << "An incorrect check number was entered." << std::endl;
+        std::exit(1);
+    }
+    else if (userAmount <= 0) {//a check with 0 amount should be tossed
+        std::cout << "An incorrect check amount was entered." << std::endl;
+        std::exit(1);
+    }
+
+}
+
+
+int Check::get_num() {
+    return num;
+}
+double Check::get_amount() {
+    return amount.get_value();
+    //returns double value. the true value is stored as an int and returning the money data type would not return the amount but the object
+}
+bool Check::get_isCashed() {
+    return isCashed;
+}
+void Check::set_num(const int& userNum) {
+    num = userNum;
+}
+void Check::set_amount(const double& userAmount) {
+    Money newAmount(userAmount);
+    amount = newAmount;
+}
+void Check::set_isCashed(const bool& userCashed) {
+    isCashed = userCashed;
+}
+
+std::istream& operator >>(std::istream& ins, Check& checkInfo) {
+    int checkNum = 0;
+    double checkAmount = 0.0;
+    bool checkCashed = false;
+    ins >> checkNum;
+    if (checkNum < -1) { // a checkNum of -1 signifies the end of creating an array of checks.
+        std::cout << "An incorrect check number was entered." << std::endl;
+        std::exit(1);
+    }
+    checkInfo.num = checkNum;
+    ins >> checkAmount;
+    if (checkAmount <= 0) {
+        std::cout << "An incorrect check amount was entered." << std::endl;
+        std::exit(1);
+    }
+    Money temp(checkAmount);
+    checkInfo.amount = temp; //why cant i do checkInfo.amount(checkAmount)?
+    ins >> checkCashed;
+    if (checkCashed != 1 && checkCashed != 0) {
+        std::cout << "An incorrect input was entered." << std::endl;
+        std::exit(1);
+    }
+    checkInfo.isCashed = checkCashed;
 
 
 
+    return ins;
+}
 
+std::ostream& operator <<(std::ostream& out, const Check& checkInfo) {
+    out << "Check number: " << checkInfo.num << " Check amount $" << checkInfo.amount.get_value() <<
+        " Check cashed: ";
+    if (checkInfo.isCashed == true) {
+        out << "Yes";
+    }
+    else {
+        out << "No";
+    }
+    return out;
+}
 
+bool operator <=(const Check& checkInfo1, const Check& checkInfo2) {
+    if (checkInfo1.num <= checkInfo2.num) {
+        return true;
+    }
+    return false;
+}
 
+bool operator <(const Check& checkInfo1, const Check& checkInfo2) {
+    if (checkInfo1.num < checkInfo2.num) {
+        return true;
+    }
+    return false;
+}
 
-
-
-
-
-
-
-
-
-
+bool operator >(const Check& checkInfo1, const Check& checkInfo2) {
+    if (checkInfo1.num > checkInfo2.num) {
+        return true;
+    }
+    return false;
+}
 
 
 //////////////////////////////////////////////// General Non-member Function Defintions /////////////////////////////////////////////////
