@@ -10,7 +10,7 @@ const int maxDoodleBugs = 3;
 const int maxBugs = maxAnts + maxDoodleBugs;
 
 class Organism {
-private: 
+private:
     int xPos = 0;
     int yPos = 0;
     int numMoves = 0;
@@ -23,13 +23,15 @@ public:
     Organism(int userXPos);
     Organism(int userXPos, int userYPos);
     Organism(int userXPos, int userYPos, int moves);
-    int getXPos();
-    int getYPos();
-    int getNumMoves();
-    char getSymb();
+    int getXPos() const;
+    int getYPos() const;
+    int getNumMoves() const;
+    char getSymb() const;
     void setXPos(int xPosition);
     void setYPos(int yPosition);
-    void set(int userNumMoves);
+    void setMoves(int userNumMoves);
+    void setSymb(char userSymb); //i only want the derived classes using it so should it be protected instead?
+    friend std::ostream& operator<<(std::ostream& outs, const Organism& bug);
 };
 
 class Ant : public Organism {
@@ -39,6 +41,7 @@ public:
     Ant(int userXPos);
     Ant(int userXPos, int userYPos);
     Ant(int userXPos, int userYPos, int moves);
+    friend std::ostream& operator <<(std::ostream& outs, const Ant& bug);
 };
 
 class Doodlebug : public Organism {
@@ -48,6 +51,7 @@ public:
     Doodlebug(int userXPos);
     Doodlebug(int userXPos, int userYPos);
     Doodlebug(int userXPos, int userYPos, int moves);
+    friend std::ostream& operator <<(std::ostream& outs, const Doodlebug& bug);
 };
 
 
@@ -97,13 +101,55 @@ Organism::Organism(int userXPos, int userYPos, int moves) {
         numMoves = 0;
         std::cout << "The number of moves was less than 0 which is impossible. Please reassign the number of moves." << std::endl;
     }
-
 }
-int getXPos();
-int getYPos();
-int getNumMoves();
-char getSymb();
-void setXPos(int xPosition);
-void setYPos(int yPosition);
-void set(int userNumMoves);
+int Organism::getXPos() const {
+    return xPos;
+}
+int Organism::getYPos() const {
+    return yPos;
+}
+int Organism::getNumMoves() const {
+    return numMoves;
+}
+char Organism::getSymb() const {
+    return symb;
+}
+void Organism::setXPos(int xPosition) {
+    xPos = xPosition;
+}
+void Organism::setYPos(int yPosition) {
+    yPos = yPosition;
+}
+void Organism::setMoves(int userNumMoves) {
+    numMoves = userNumMoves;
+}
+void Organism::setSymb(char userSymb) {
+    symb = userSymb;
+}
 
+std::ostream& operator<<(std::ostream& outs, const Organism& bug) {
+    outs << bug.symb;
+    return outs;
+}
+
+
+////Class Defintion for Ants
+Ant::Ant() : Organism() { setSymb('o'); }
+Ant::Ant(int userXPos) : Organism(userXPos) { setSymb('o'); }
+Ant::Ant(int userXPos, int userYPos) : Organism(userXPos, userYPos) { setSymb('o'); }
+Ant::Ant(int userXPos, int userYPos, int moves) : Organism(userXPos, userYPos, moves) { setSymb('o'); }
+std::ostream& operator <<(std::ostream& outs, const Ant& bug) {
+    outs << bug.getSymb();
+    return outs;
+}
+
+///////Class Defintion for Doodlebug
+
+Doodlebug::Doodlebug() : Organism() { setSymb('X'); }
+Doodlebug::Doodlebug(int userXPos) : Organism(userXPos) { setSymb('X'); }
+Doodlebug::Doodlebug(int userXPos, int userYPos) : Organism(userXPos, userYPos) { setSymb('X'); }
+Doodlebug::Doodlebug(int userXPos, int userYPos, int moves) : Organism(userXPos, userYPos, moves) { setSymb('X'); }
+std::ostream& operator <<(std::ostream& outs, const Doodlebug& bug) {
+    outs << bug.getSymb();
+    return outs;
+}
