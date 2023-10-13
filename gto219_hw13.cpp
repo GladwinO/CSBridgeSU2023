@@ -1,48 +1,48 @@
 // gto219_hw13.cpp:
 
 #include <iostream>
+#include <string>
 #include <cstdlib>
 #include <ctime>
 
 //area for const variables
-const int numRows = 4;
-const int numCols = 4;
-const int maxAnts = 2;
-const int maxDoodleBugs = 3;
+const int numRows = 20;
+const int numCols = 20;
+const int maxAnts = 100;
+const int maxDoodleBugs = 5;
 const int maxBugs = maxAnts + maxDoodleBugs;
-const int stepsBreed = 3;
+const int stepsAntBreed = 3;
+const int stepsDoodlebugBreed = 8;
+const int maxTimeStarvedDoodlebug = 3;
 
 class Organism {
 private:
     int xPos = 0;
     int yPos = 0;
-    int numMoves = 0;
     int timeSteps = 0;
     char symb = '-';
-    
+
 
 public:
     Organism();
     Organism(int userXPos);
     Organism(int userXPos, int userYPos);
-    Organism(int userXPos, int userYPos, int moves);
-    Organism(int userXPos, int userYPos, int moves, int userTimeSteps);
+    Organism(int userXPos, int userYPos, int userTimeSteps);
     Organism(const Organism& bug);
     int getXPos() const;
     int getYPos() const;
-    int getNumMoves() const;
     int getTimeSteps() const;
-    virtual int getTimesEaten();
+    virtual int getLastTimeEaten();
     char getSymb() const;
     void setXPos(int xPosition);
     void setYPos(int yPosition);
     void setTimeSteps(int userTimeSteps);
-    void setMoves(int userNumMoves);
-    void setSymb(char userSymb); //i only want the derived classes using it so should it be protected instead?
-    virtual void setTimesEaten(int numEaten);
+    void setSymb(char userSymb);
+    virtual void setLastTimeEaten(int numLastTimeEaten);
     virtual void newPos(int& newXLoc, int& newYLoc);
     virtual void Move(Organism* orgArrPtr[][numCols]);
     virtual void Breed(Organism* orgArrPtr[][numCols]);
+    virtual bool Starve(Organism* orgArrPtr[][numCols]);
     friend std::ostream& operator<<(std::ostream& outs, const Organism& bug);
 
 };
@@ -50,31 +50,32 @@ public:
 class Ant : public Organism {
 private:
     void newPos(int& newXLoc, int& newYLoc);
+    void suppBreedFunc(Organism* orgArrPtr[][numCols], int& newXLoc, int& newYLoc);
     void Breed(Organism* orgArrPtr[][numCols]);
 public:
     Ant();
     Ant(int userXPos);
     Ant(int userXPos, int userYPos);
-    Ant(int userXPos, int userYPos, int moves);
-    Ant(int userXPos, int userYPos, int moves, int userTimeSteps);
+    Ant(int userXPos, int userYPos, int userTimeSteps);
     Ant(Organism bug);
     void Move(Organism* orgArrPtr[][numCols]);
-    //void Breed(Organism* orgArrPtr[][numCols]);
     friend std::ostream& operator <<(std::ostream& outs, const Ant& bug);
 };
 
 class Doodlebug : public Organism {
-    int timesEaten = 0;
+    int timeSinceLastEaten = 0;
     void newPos(int& newXLoc, int& newYLoc);
+    void suppBreedFunc(Organism* orgArrPtr[][numCols], int& newXLoc, int& newYLoc);
+    void Breed(Organism* orgArrPtr[][numCols]);
+    bool Starve(Organism* orgArrPtr[][numCols]);
 public:
     Doodlebug();
     Doodlebug(int userXPos);
     Doodlebug(int userXPos, int userYPos);
-    Doodlebug(int userXPos, int userYPos, int moves);
-    Doodlebug(int userXPos, int userYPos, int moves, int numEaten);
-    Doodlebug(Organism bug, int numEaten);
-    int getTimesEaten() const;
-    void setTimesEaten(int numEaten);
+    Doodlebug(int userXPos, int userYPos, int numSinceLastEaten);
+    Doodlebug(Organism bug, int numSinceLastEaten);
+    int getLastTimeEaten() const;
+    void setLastTimeEaten(int numSinceLastEaten);
     void Move(Organism* orgArrPtr[][numCols]);
     friend std::ostream& operator <<(std::ostream& outs, const Doodlebug& bug);
 };
@@ -86,6 +87,8 @@ void createPlayableGrid(Organism* orgArrPtr[][numCols]);
 
 void printGrid(Organism* orgArrPtr[][numCols]);
 
+void runGame(Organism* orgArrPtr[][numCols]);
+
 void deleteGrid(Organism* orgArrPtr[][numCols]);
 
 
@@ -93,59 +96,11 @@ int main()
 {
     Organism* orgArrPtr[numRows][numCols];
     createBaseGrid(orgArrPtr);
+    createPlayableGrid(orgArrPtr); //the initial Grid is generated using random position based on current computer time. To test a single scenario comment that code out in this function
+    std::cout << "World at time 0:\n" << std::endl;
     printGrid(orgArrPtr);
-
-    createPlayableGrid(orgArrPtr);
-
-    printGrid(orgArrPtr);
-
-    int maxTimeSteps = 1;
-    for (int m = 0; m < 6; m++) {
-        
-        for (int k = 0; k < numRows; k++) {
-            for (int l = 0; l < numCols; l++) {
-                if (orgArrPtr[k][l]->getSymb() == 'X' && orgArrPtr[k][l]->getTimeSteps() < maxTimeSteps) {
-                    orgArrPtr[k][l]->Move(orgArrPtr);
-                }
-            }
-        }
-
-        for (int i = 0; i < numRows; i++) {
-            for (int j = 0; j < numCols; j++) {
-                if (orgArrPtr[i][j]->getSymb() == 'o' && orgArrPtr[i][j]->getTimeSteps() < maxTimeSteps) {
-                    orgArrPtr[i][j]->Move(orgArrPtr);
-                    
-                    
-                }
-            }
-        }
-        maxTimeSteps++;
-
-
-        printGrid(orgArrPtr);
-    }
-    /*int maxTimeSteps = 1;
-    for (int k = 0; k < numRows; k++) {
-        for (int l = 0; l < numCols; l++) {
-            if (orgArrPtr[k][l]->getSymb() == 'X' && orgArrPtr[k][l]->getTimeSteps() < maxTimeSteps) {
-                orgArrPtr[k][l]->Move(orgArrPtr);
-            }
-        }
-    }
-    
-    for (int i = 0; i < numRows; i++) {
-        for (int j = 0; j < numCols; j++) {
-            if (orgArrPtr[i][j]->getSymb() == 'o' && orgArrPtr[i][j]->getTimeSteps() < maxTimeSteps) {
-                orgArrPtr[i][j]->Move(orgArrPtr);
-                orgArrPtr[i][j]->Breed(orgArrPtr);
-            }
-        }
-    }
-    maxTimeSteps++;
-    
-
-    printGrid(orgArrPtr);*/
-
+    std::cout << "Press ENTER to continue\n" << std::endl;
+    runGame(orgArrPtr);
     deleteGrid(orgArrPtr);
 
 
@@ -202,7 +157,7 @@ Organism::Organism(int userXPos, int userYPos) :xPos(userXPos), yPos(userYPos) {
             << "between 0 and 19." << std::endl;
     }
 }
-Organism::Organism(int userXPos, int userYPos, int moves) : xPos(userXPos), yPos(userYPos), numMoves(moves) {
+Organism::Organism(int userXPos, int userYPos, int userTimeSteps) : xPos(userXPos), yPos(userYPos), timeSteps(userTimeSteps) {
     if (userXPos < 0 || userXPos >= numRows) {
         xPos = 0;
         std::cout << "Row position out of range. Row position has been set equal to 0. Please reassign row position to a number "
@@ -212,26 +167,6 @@ Organism::Organism(int userXPos, int userYPos, int moves) : xPos(userXPos), yPos
         yPos = 0;
         std::cout << "Column position out of range. Column position has been set equal to 0. Please reassign column position to a number "
             << "between 0 and 19." << std::endl;
-    }
-    if (moves < 0) {
-        numMoves = 0;
-        std::cout << "The number of moves was less than 0 which is impossible. Please reassign the number of moves." << std::endl;
-    }
-}
-Organism::Organism(int userXPos, int userYPos, int moves, int userTimeSteps) : xPos(userXPos), yPos(userYPos), numMoves(moves), timeSteps(userTimeSteps) {
-    if (userXPos < 0 || userXPos >= numRows) {
-        xPos = 0;
-        std::cout << "Row position out of range. Row position has been set equal to 0. Please reassign row position to a number "
-            << "between 0 and 19." << std::endl;
-    }
-    if (userYPos < 0 || userYPos >= numCols) {
-        yPos = 0;
-        std::cout << "Column position out of range. Column position has been set equal to 0. Please reassign column position to a number "
-            << "between 0 and 19." << std::endl;
-    }
-    if (moves < 0) {
-        numMoves = 0;
-        std::cout << "The number of moves was less than 0 which is impossible. Please reassign the number of moves." << std::endl;
     }
     if (timeSteps < 0) {
         timeSteps = 0;
@@ -242,9 +177,8 @@ Organism::Organism(int userXPos, int userYPos, int moves, int userTimeSteps) : x
 Organism::Organism(const Organism& bug) {
     xPos = bug.xPos;
     yPos = bug.yPos;
-    numMoves = bug.numMoves;
     timeSteps = bug.timeSteps;
-    //may include copying the symbol as well
+    
 }
 int Organism::getXPos() const {
     return xPos;
@@ -252,16 +186,13 @@ int Organism::getXPos() const {
 int Organism::getYPos() const {
     return yPos;
 }
-int Organism::getNumMoves() const {
-    return numMoves;
-}
 int Organism::getTimeSteps() const {
     return timeSteps;
 }
 char Organism::getSymb() const {
     return symb;
 }
-int Organism::getTimesEaten() {
+int Organism::getLastTimeEaten() {
     //do nothing
     return 0;
 }
@@ -271,16 +202,13 @@ void Organism::setXPos(int xPosition) {
 void Organism::setYPos(int yPosition) {
     yPos = yPosition;
 }
-void Organism::setMoves(int userNumMoves) {
-    numMoves = userNumMoves;
-}
 void Organism::setTimeSteps(int userTimeSteps) {
     timeSteps = userTimeSteps;
 }
 void Organism::setSymb(char userSymb) {
     symb = userSymb;
 }
-void Organism::setTimesEaten(int numEaten) {
+void Organism::setLastTimeEaten(int numLastTimeEaten) {
     //do nothing;
 }
 
@@ -290,6 +218,10 @@ void Organism::Move(Organism* orgArrPtr[][numCols]) {
 
 void Organism::Breed(Organism* orgArrPtr[][numCols]) {
     //do nothing. I do not want '-' to breed
+}
+bool Organism::Starve(Organism* orgArrPtr[][numCols]) {
+    //do nothing. I do not want '-' to starve
+    return false;
 }
 
 std::ostream& operator<<(std::ostream& outs, const Organism& bug) {
@@ -302,8 +234,7 @@ std::ostream& operator<<(std::ostream& outs, const Organism& bug) {
 Ant::Ant() : Organism() { setSymb('o'); }
 Ant::Ant(int userXPos) : Organism(userXPos) { setSymb('o'); }
 Ant::Ant(int userXPos, int userYPos) : Organism(userXPos, userYPos) { setSymb('o'); }
-Ant::Ant(int userXPos, int userYPos, int moves) : Organism(userXPos, userYPos, moves) { setSymb('o'); }
-Ant::Ant(int userXPos, int userYPos, int moves, int userTimeSteps) : Organism(userXPos, userYPos, moves, userTimeSteps) { setSymb('o'); }
+Ant::Ant(int userXPos, int userYPos, int userTimeSteps) : Organism(userXPos, userYPos, userTimeSteps) { setSymb('o'); }
 Ant::Ant(Organism bug) : Organism(bug) { setSymb('o'); }
 
 void Ant::newPos(int& newXLoc, int& newYLoc) {
@@ -323,24 +254,18 @@ void Ant::Move(Organism* orgArrPtr[][numCols]) {
     if ((newXLoc < 0 || newXLoc >= numRows) || (newYLoc < 0 || newYLoc >= numCols)) {
         //new position out of grid
         this->setTimeSteps(getTimeSteps() + 1);
-        std::cout << orgArrPtr[xLoc][yLoc]->getTimeSteps() << " (" << xLoc << "," << yLoc << ")" << std::endl; //for testing
-
-        std::cout << "noGrid" << std::endl; /// will need to get rid of this
+        orgArrPtr[xLoc][yLoc]->Breed(orgArrPtr);
     }
     else if (orgArrPtr[newXLoc][newYLoc]->getSymb() != '-') {
         //position occupied
         this->setTimeSteps(getTimeSteps() + 1);
-        std::cout << orgArrPtr[xLoc][yLoc]->getTimeSteps() << " (" << xLoc << "," << yLoc << ")" << std::endl;
         orgArrPtr[xLoc][yLoc]->Breed(orgArrPtr);
-
-        std::cout << "posOcc" << std::endl; ///will need to get rid of this
     }
     else {
         Organism* temp = new Ant(*orgArrPtr[xLoc][yLoc]);
         Organism* temp2 = new Organism(*orgArrPtr[newXLoc][newYLoc]);
         temp->setXPos(newXLoc);
         temp->setYPos(newYLoc);
-        temp->setMoves(getNumMoves() + 1);
         temp->setTimeSteps(getTimeSteps() + 1);
         temp2->setXPos(xLoc);
         temp2->setYPos(yLoc);
@@ -349,12 +274,59 @@ void Ant::Move(Organism* orgArrPtr[][numCols]) {
         delete orgArrPtr[newXLoc][newYLoc];
         orgArrPtr[xLoc][yLoc] = temp2;
         orgArrPtr[newXLoc][newYLoc] = temp;
-        std::cout << orgArrPtr[newXLoc][newYLoc]->getTimeSteps() << " (" << newXLoc << "," << newYLoc << ")" << std::endl;
         orgArrPtr[newXLoc][newYLoc]->Breed(orgArrPtr);
 
     }
-    
-    
+
+
+}
+
+void Ant::suppBreedFunc(Organism* orgArrPtr[][numCols], int& newXLoc, int& newYLoc) {
+    bool isBred = false;
+    if ((newXLoc - 1) >= 0 && (newXLoc - 1) < numRows) {
+        //breed up
+        if (orgArrPtr[newXLoc - 1][newYLoc]->getSymb() == '-' && isBred == false) {
+            newXLoc--;
+            Organism* temp = new Ant(newXLoc, newYLoc);
+            temp->setTimeSteps(this->getTimeSteps());
+            delete orgArrPtr[newXLoc][newYLoc];
+            orgArrPtr[newXLoc][newYLoc] = temp;
+            isBred = true;
+        }
+    }
+    if ((newXLoc + 1) >= 0 && (newXLoc + 1) < numRows) {
+        //breed down
+        if (orgArrPtr[newXLoc + 1][newYLoc]->getSymb() == '-' && isBred == false) {
+            newXLoc++;
+            Organism* temp = new Ant(newXLoc, newYLoc);
+            temp->setTimeSteps(this->getTimeSteps());
+            delete orgArrPtr[newXLoc][newYLoc];
+            orgArrPtr[newXLoc][newYLoc] = temp;
+            isBred = true;
+        }
+    }
+    if ((newYLoc - 1) >= 0 && (newYLoc - 1) < numCols) {
+        //breed left
+        if (orgArrPtr[newXLoc][newYLoc - 1]->getSymb() == '-' && isBred == false) {
+            newYLoc--;
+            Organism* temp = new Ant(newXLoc, newYLoc);
+            temp->setTimeSteps(this->getTimeSteps());
+            delete orgArrPtr[newXLoc][newYLoc];
+            orgArrPtr[newXLoc][newYLoc] = temp;
+            isBred = true;
+        }
+    }
+    if ((newYLoc + 1) >= 0 && (newYLoc + 1) < numCols) {
+        //breed right
+        if (orgArrPtr[newXLoc][newYLoc + 1]->getSymb() == '-' && isBred == false) {
+            newYLoc++;
+            Organism* temp = new Ant(newXLoc, newYLoc);
+            temp->setTimeSteps(this->getTimeSteps());
+            delete orgArrPtr[newXLoc][newYLoc];
+            orgArrPtr[newXLoc][newYLoc] = temp;
+            isBred = true;
+        }
+    }
 }
 
 void Ant::Breed(Organism* orgArrPtr[][numCols]) {
@@ -362,51 +334,9 @@ void Ant::Breed(Organism* orgArrPtr[][numCols]) {
     int yLoc = this->getYPos();
     int newXLoc = xLoc;
     int newYLoc = yLoc;
-    int isBred = false;
-    
-    if (this->getTimeSteps() > 0 && this->getTimeSteps() % stepsBreed == 0) {
-        if ((newXLoc - 1) >= 0 && (newXLoc - 1) < numRows) {
-            //breed up
-            if (orgArrPtr[newXLoc - 1][newYLoc]->getSymb() == '-' && isBred == false) {
-                newXLoc--;
-                Organism* temp = new Ant(newXLoc, newYLoc);
-                temp->setTimeSteps(this->getTimeSteps());
-                delete orgArrPtr[newXLoc][newYLoc];
-                orgArrPtr[newXLoc][newYLoc] = temp;
-                isBred = true;
-            }
-        }
-        if ((newXLoc + 1) >= 0 && (newXLoc + 1) < numRows) {
-            //breed down
-            if (orgArrPtr[newXLoc + 1][newYLoc]->getSymb() == '-' && isBred == false) {
-                newXLoc++;
-                Organism* temp = new Ant(newXLoc, newYLoc);
-                delete orgArrPtr[newXLoc][newYLoc];
-                orgArrPtr[newXLoc][newYLoc] = temp;
-                isBred = true;
-            }
-        }
-        if ((newYLoc - 1) >= 0 && (newYLoc - 1) < numCols) {
-            //breed left
-            if (orgArrPtr[newXLoc][newYLoc - 1]->getSymb() == '-' && isBred == false) {
-                newYLoc--;
-                Organism* temp = new Ant(newXLoc, newYLoc);
-                delete orgArrPtr[newXLoc][newYLoc];
-                orgArrPtr[newXLoc][newYLoc] = temp;
-                isBred = true;
-            }
-        }
-        if ((newYLoc + 1) >= 0 && (newYLoc + 1) < numCols) {
-            //breed right
-            if (orgArrPtr[newXLoc][newYLoc + 1]->getSymb() == '-' && isBred == false) {
-                newYLoc++;
-                Organism* temp = new Ant(newXLoc, newYLoc);
-                delete orgArrPtr[newXLoc][newYLoc];
-                orgArrPtr[newXLoc][newYLoc] = temp;
-                isBred = true;
-            }
-        }
-        
+
+    if (this->getTimeSteps() > 0 && this->getTimeSteps() % stepsAntBreed == 0) {
+        suppBreedFunc(orgArrPtr, newXLoc, newYLoc);
     }
 }
 
@@ -417,50 +347,56 @@ std::ostream& operator <<(std::ostream& outs, const Ant& bug) {
 
 ///////Class Defintion for Doodlebug
 
-Doodlebug::Doodlebug() : Organism() { setSymb('X'); }
-Doodlebug::Doodlebug(int userXPos) : Organism(userXPos) { setSymb('X'); }
-Doodlebug::Doodlebug(int userXPos, int userYPos) : Organism(userXPos, userYPos) { setSymb('X'); }
-Doodlebug::Doodlebug(int userXPos, int userYPos, int moves) : Organism(userXPos, userYPos, moves) { setSymb('X'); }
-Doodlebug::Doodlebug(int userXPos, int userYPos, int moves, int numEaten) :Organism(userXPos, userYPos, moves), timesEaten(numEaten) { setSymb('X'); }
-Doodlebug::Doodlebug(Organism bug, int numEaten) : Organism(bug), timesEaten(numEaten) { setSymb('X'); }
-int Doodlebug::getTimesEaten() const {
-    return timesEaten;
+Doodlebug::Doodlebug() : Organism() { setSymb('X'); setLastTimeEaten(0); }
+Doodlebug::Doodlebug(int userXPos) : Organism(userXPos) { setSymb('X'); setLastTimeEaten(0); }
+Doodlebug::Doodlebug(int userXPos, int userYPos) : Organism(userXPos, userYPos) { setSymb('X'); setLastTimeEaten(0); }
+Doodlebug::Doodlebug(int userXPos, int userYPos, int numSinceLastEaten) :Organism(userXPos, userYPos), timeSinceLastEaten(numSinceLastEaten) { setSymb('X'); }
+Doodlebug::Doodlebug(Organism bug, int numSinceLastEaten) : Organism(bug), timeSinceLastEaten(numSinceLastEaten) { setSymb('X'); }
+int Doodlebug::getLastTimeEaten() const {
+    return timeSinceLastEaten;
 }
-void Doodlebug::setTimesEaten(int numEaten) {
-    timesEaten = numEaten;
+void Doodlebug::setLastTimeEaten(int numSinceLastEaten) {
+    timeSinceLastEaten = numSinceLastEaten;
 }
 
 void Doodlebug::newPos(int& newXLoc, int& newYLoc) {
     Organism::newPos(newXLoc, newYLoc);
 }
+
 void Doodlebug::Move(Organism* orgArrPtr[][numCols]) {
     int xLoc = this->getXPos();
     int yLoc = this->getYPos();
     int newXLoc = xLoc;
     int newYLoc = yLoc;
+    bool isStarved = false;
 
     newPos(newXLoc, newYLoc);
 
     if ((newXLoc < 0 || newXLoc >= numRows) || (newYLoc < 0 || newYLoc >= numCols)) {
         //new position out of grid
         this->setTimeSteps(getTimeSteps() + 1);
-
-        std::cout << "noGrid" << std::endl; /// will need to get rid of this
+        this->setLastTimeEaten(getLastTimeEaten() + 1);
+        isStarved = this->Starve(orgArrPtr);
+        if (isStarved = false) {
+            orgArrPtr[xLoc][yLoc]->Breed(orgArrPtr);
+        }
     }
     else if (orgArrPtr[newXLoc][newYLoc]->getSymb() == 'X') {
         //position occupied by another Doodlebug
         this->setTimeSteps(getTimeSteps() + 1);
-
-        std::cout << "posOccByDood" << std::endl; ///will need to get rid of this
+        this->setLastTimeEaten(getLastTimeEaten() + 1);
+        isStarved = this->Starve(orgArrPtr);
+        if (isStarved = false) {
+            orgArrPtr[xLoc][yLoc]->Breed(orgArrPtr);
+        }
     }
     else if (orgArrPtr[newXLoc][newYLoc]->getSymb() == 'o') {
-        Organism* temp = new Doodlebug(*orgArrPtr[xLoc][yLoc], orgArrPtr[xLoc][yLoc]->getTimesEaten());
+        Organism* temp = new Doodlebug(*orgArrPtr[xLoc][yLoc], orgArrPtr[xLoc][yLoc]->getLastTimeEaten());
         Organism* temp2 = new Organism(*orgArrPtr[newXLoc][newYLoc]);
         temp->setXPos(newXLoc);
         temp->setYPos(newYLoc);
-        temp->setMoves(getNumMoves() + 1);
         temp->setTimeSteps(getTimeSteps() + 1);
-        temp->setTimesEaten(getTimesEaten() + 1);
+        temp->setLastTimeEaten(0);
         temp2->setXPos(xLoc);
         temp2->setYPos(yLoc);
 
@@ -468,14 +404,15 @@ void Doodlebug::Move(Organism* orgArrPtr[][numCols]) {
         delete orgArrPtr[newXLoc][newYLoc];
         orgArrPtr[xLoc][yLoc] = temp2;
         orgArrPtr[newXLoc][newYLoc] = temp;
+        orgArrPtr[newXLoc][newYLoc]->Breed(orgArrPtr);
     }
-    else{
-        Organism* temp = new Doodlebug(*orgArrPtr[xLoc][yLoc], orgArrPtr[xLoc][yLoc]->getTimesEaten());
+    else {
+        Organism* temp = new Doodlebug(*orgArrPtr[xLoc][yLoc], orgArrPtr[xLoc][yLoc]->getLastTimeEaten());
         Organism* temp2 = new Organism(*orgArrPtr[newXLoc][newYLoc]);
         temp->setXPos(newXLoc);
         temp->setYPos(newYLoc);
-        temp->setMoves(getNumMoves() + 1);
         temp->setTimeSteps(getTimeSteps() + 1);
+        temp->setLastTimeEaten(getLastTimeEaten() + 1);
         temp2->setXPos(xLoc);
         temp2->setYPos(yLoc);
 
@@ -483,9 +420,86 @@ void Doodlebug::Move(Organism* orgArrPtr[][numCols]) {
         delete orgArrPtr[newXLoc][newYLoc];
         orgArrPtr[xLoc][yLoc] = temp2;
         orgArrPtr[newXLoc][newYLoc] = temp;
+        isStarved = orgArrPtr[newXLoc][newYLoc]->Starve(orgArrPtr);
+        if (isStarved = false) {
+            orgArrPtr[newXLoc][newYLoc]->Breed(orgArrPtr);
+        }
 
     }
 }
+
+void Doodlebug::suppBreedFunc(Organism* orgArrPtr[][numCols], int& newXLoc, int& newYLoc) {
+    bool isBred = false;
+    if ((newXLoc - 1) >= 0 && (newXLoc - 1) < numRows) {
+        //breed up
+        if (orgArrPtr[newXLoc - 1][newYLoc]->getSymb() == '-' && isBred == false) {
+            newXLoc--;
+            Organism* temp = new Doodlebug(newXLoc, newYLoc);
+            temp->setTimeSteps(this->getTimeSteps());
+            delete orgArrPtr[newXLoc][newYLoc];
+            orgArrPtr[newXLoc][newYLoc] = temp;
+            isBred = true;
+        }
+    }
+    if ((newXLoc + 1) >= 0 && (newXLoc + 1) < numRows) {
+        //breed down
+        if (orgArrPtr[newXLoc + 1][newYLoc]->getSymb() == '-' && isBred == false) {
+            newXLoc++;
+            Organism* temp = new Doodlebug(newXLoc, newYLoc);
+            temp->setTimeSteps(this->getTimeSteps());
+            delete orgArrPtr[newXLoc][newYLoc];
+            orgArrPtr[newXLoc][newYLoc] = temp;
+            isBred = true;
+        }
+    }
+    if ((newYLoc - 1) >= 0 && (newYLoc - 1) < numCols) {
+        //breed left
+        if (orgArrPtr[newXLoc][newYLoc - 1]->getSymb() == '-' && isBred == false) {
+            newYLoc--;
+            Organism* temp = new Doodlebug(newXLoc, newYLoc);
+            temp->setTimeSteps(this->getTimeSteps());
+            delete orgArrPtr[newXLoc][newYLoc];
+            orgArrPtr[newXLoc][newYLoc] = temp;
+            isBred = true;
+        }
+    }
+    if ((newYLoc + 1) >= 0 && (newYLoc + 1) < numCols) {
+        //breed right
+        if (orgArrPtr[newXLoc][newYLoc + 1]->getSymb() == '-' && isBred == false) {
+            newYLoc++;
+            Organism* temp = new Doodlebug(newXLoc, newYLoc);
+            temp->setTimeSteps(this->getTimeSteps());
+            delete orgArrPtr[newXLoc][newYLoc];
+            orgArrPtr[newXLoc][newYLoc] = temp;
+            isBred = true;
+        }
+    }
+}
+
+void Doodlebug::Breed(Organism* orgArrPtr[][numCols]) {
+    int xLoc = this->getXPos();
+    int yLoc = this->getYPos();
+    int newXLoc = xLoc;
+    int newYLoc = yLoc;
+
+    if (this->getTimeSteps() > 0 && this->getTimeSteps() % stepsDoodlebugBreed == 0) {
+        suppBreedFunc(orgArrPtr, newXLoc, newYLoc);
+    }
+}
+
+bool Doodlebug::Starve(Organism* orgArrPtr[][numCols]) {
+    int xLoc = this->getXPos();
+    int yLoc = this->getYPos();
+    int timeLastEaten = this->getLastTimeEaten();
+    if (timeLastEaten >= maxTimeStarvedDoodlebug) {
+        delete orgArrPtr[xLoc][yLoc];
+        orgArrPtr[xLoc][yLoc] = new Organism(xLoc, yLoc);
+        return true;
+    }
+    return false;
+    
+}
+
 std::ostream& operator <<(std::ostream& outs, const Doodlebug& bug) {
     outs << bug.getSymb();
     return outs;
@@ -538,7 +552,40 @@ void printGrid(Organism* orgArrPtr[][numCols]) {
         }
         std::cout << std::endl;
     }
-    std::cout << std::endl;
+    std::cout << "\n" << std::endl;
+}
+
+void runGame(Organism* orgArrPtr[][numCols]) {
+    std::string enter;
+    std::getline(std::cin, enter);
+    int strSize = enter.size();
+    int maxTimeSteps = 1;
+    while (strSize == 0) {
+        std::cout << "World at time " << maxTimeSteps << ":\n\n" << std::endl;
+        for (int k = 0; k < numRows; k++) {
+            for (int l = 0; l < numCols; l++) {
+                if (orgArrPtr[k][l]->getSymb() == 'X' && orgArrPtr[k][l]->getTimeSteps() < maxTimeSteps) {
+                    orgArrPtr[k][l]->Move(orgArrPtr);
+                }
+            }
+        }
+
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < numCols; j++) {
+                if (orgArrPtr[i][j]->getSymb() == 'o' && orgArrPtr[i][j]->getTimeSteps() < maxTimeSteps) {
+                    orgArrPtr[i][j]->Move(orgArrPtr);
+
+
+                }
+            }
+        }
+        maxTimeSteps++;
+        printGrid(orgArrPtr);
+
+        std::cout << "Press ENTER to continue";
+        std::getline(std::cin, enter);
+        std::cout << "\n" << std::endl;
+    }
 }
 
 void deleteGrid(Organism* orgArrPtr[][numCols]) {
