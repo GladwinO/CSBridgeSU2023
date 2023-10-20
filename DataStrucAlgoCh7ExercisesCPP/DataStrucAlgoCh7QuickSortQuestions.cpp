@@ -21,7 +21,14 @@ int main()
     for (int i = 0; i < userVec.size(); i++) {
         std::cout << userVec[i] << " ";
     }
-    
+    std::cout << "\n";
+
+    std::vector<int> userVec2 = { 3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5 };
+    quickSort(userVec2);
+    for (int i = 0; i < userVec2.size(); i++) {
+        std::cout << userVec2[i] << " ";
+    }
+
 }
 
 void insertionSort(std::vector<int>& vec, int start, int end) {
@@ -36,13 +43,14 @@ void insertionSort(std::vector<int>& vec, int start, int end) {
 }
 
 void quickSort(std::vector<int>& vec, int start, int end) {
-    if (end - start + 1 <= 10) {
+    if (end - start + 1 <= 3) {
         insertionSort(vec, start, end);
     }
     else {
+        
         int pivotLoc = (end + start) / 2;
-        int pivotVal = vec[(pivotLoc)];
-        //this area of code my be wrong
+        int pivotVal = vec[pivotLoc];
+        
         if (pivotVal < vec[start]) {
             vec[pivotLoc] = vec[start];
             vec[start] = pivotVal;
@@ -56,17 +64,19 @@ void quickSort(std::vector<int>& vec, int start, int end) {
             vec[pivotLoc] = vec[end];
             vec[end] = temp;
         }
-        //
+        
         int temp2 = vec[pivotLoc];
         vec[pivotLoc] = vec[end - 1];
         vec[end - 1] = temp2;
 
+        
+
         int i = start;
         int j = end - 1;
         for (;;) {
+            while (vec[++i] < temp2) {}
+            while (vec[--j] > temp2) {}
             if (i < j) {
-                while (vec[++i] < temp2) {}
-                while (vec[--j] > temp2) {}
                 int temp3 = vec[i];
                 vec[i] = vec[j];
                 vec[j] = temp3;
@@ -74,13 +84,18 @@ void quickSort(std::vector<int>& vec, int start, int end) {
             else {
                 break;
             }
+            
             vec[end - 1] = vec[i];
             vec[i] = temp2;
         }
+        
 
-
-        quickSort(vec, start, pivotLoc - 1);
-        quickSort(vec, pivotLoc + 1, end);
+        quickSort(vec, start, i - 1);
+        quickSort(vec, i + 1, end);
 
     }
-} 
+}
+
+void quickSort(std::vector<int>& vec) {
+    quickSort(vec, 0, vec.size() - 1);
+}
