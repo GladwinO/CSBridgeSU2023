@@ -1,6 +1,7 @@
 // gto219_hw15.cpp : 
 
 #include <iostream>
+#include<fstream>
 #include <string>
 #include<vector>
 #include <cmath>
@@ -23,6 +24,7 @@ public:
     Person& operator-(double avgPay);
     friend double operator+(const Person& person, const double& moneyPaid);
     friend double operator+=(const double& lhs, const Person& person);
+    friend std::ifstream& operator>>(std::ifstream& ins, Person& person);
 };
 
 //LListNode class
@@ -66,6 +68,8 @@ public:
 };
 
 ///////////////////////// General Function Declaration ////////////////////////////
+
+void openInputFile(std::ifstream& inputFile);
 
 template<class T>
 void avgPay(const LList<T>& list, double& avgPay);
@@ -123,6 +127,18 @@ double operator+(const Person& person, const double& moneyPaid) {
 
 double operator+=(const double& lhs, const Person& person) {
     return lhs + person.amountPaid;
+}
+
+std::ifstream& operator>>(std::ifstream& ins, Person& person) {
+    double temp;
+    ins >> temp;
+    if (temp < 0) {
+        person.amountPaid = 0;
+    }
+    else {
+        person.amountPaid = temp;
+    }
+    return ins;
 }
 
 ////////////////////// Definitions for LList Class /////////////////////////////
@@ -202,6 +218,22 @@ void LList<T>::insertAtEnd(T newData) {
 
 
 ///////////////////// General Function Definitions ///////////////////////
+void openInputFile(std::ifstream& inputFile) {
+    std::string  filename;
+    std::cout << "Please provide the filename: ";
+    std::cin >> filename;
+    inputFile.open(filename);
+    while (!inputFile) {
+        std::cout << "Incorrect filename entered. Please enter a new filename." << std::endl;
+        std::cout << "New filename: ";
+        std::cin >> filename;
+        inputFile.clear();
+        inputFile.open(filename);
+    }
+}
+
+
+
 template<class T>
 void avgPay(const LList<T>& list, double& avgPay) {
     if (!list.isEmpty()) {
