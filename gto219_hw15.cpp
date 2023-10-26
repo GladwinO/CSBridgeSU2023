@@ -32,7 +32,7 @@ public:
 template <class T>
 class LList;
 
-template<class T> 
+template<class T>
 class LListNode {
 private:
     T data;
@@ -41,6 +41,7 @@ public:
     LListNode(T newData = T(), LListNode<T>* newNext = nullptr) : data(newData), next(newNext) {}
     friend class LList<T>;
     T getData() { return data; }
+    void setData(T newData) { data = newData; }
     LListNode<T>* getNext() { return next; }
 };
 
@@ -66,28 +67,25 @@ public:
     bool isEmpty() const { return head == nullptr; }
     int getSize() const { return size; }
     LListNode<T>* getHead() const { return head; }
-    void calOwed(const double& avgPay);
+    
 };
 
 ///////////////////////// General Function Declaration ////////////////////////////
 
 void openInputFile(std::ifstream& inputFile);
 
-template<class T>
-void readInputFile(LList<T>& personList);
+void readInputFile(LList<Person>& personList);
 
-template<class T>
-void avgPay(const LList<T>& list, double& avgPay);
+void avgPay(const LList<Person>& list, double& avgPay);
 
-/*template<class T>
-void calOwed(const LList<T>& list, const double& avgPay);*/
+void calOwed(const LList<Person>& list, const double& avgPay);
 
-/*template<class T>
-void createListVec(const LList<T>& list, std::vector<T>& listVec);
+
+void createListVec(const LList<Person>& list, std::vector<Person>& listVec);
 
 void categorizePeople(const std::vector<Person>& listVec, std::vector<Person>& vecOwed, std::vector<Person>& vecOwes);
 
-void printPayArrang(std::vector<Person> vecOwed, std::vector<Person> vecOwes, double avgPay);*/
+void printPayArrang(std::vector<Person> vecOwed, std::vector<Person> vecOwes, double avgPay);
 
 
 int main()
@@ -99,21 +97,16 @@ int main()
     readInputFile(personList);
     double averagePay = 0;
     avgPay(personList, averagePay);
-    LListNode<Person>* iter;
-    iter = personList.getHead();
-    double amountPaid = iter->getData().getAmountPaid();
-    double amountOwed = amountPaid - averagePay;
-    iter->getData().setAmountOwed(amountOwed);
-    std::cout << iter->getData().getAmountOwed();
-    //calOwed(personList, averagePay);
-    //createListVec(personList, listVec);
+   
+    calOwed(personList, averagePay);
+    createListVec(personList, listVec);
 
     /*for (const Person& person : listVec) {
         std::cout << person.getAmountOwed() << std::endl;
     }*/
-    //categorizePeople(listVec, vecOwed, vecOwes);
-    
-    //printPayArrang(vecOwed, vecOwes, averagePay);
+    categorizePeople(listVec, vecOwed, vecOwes);
+
+    printPayArrang(vecOwed, vecOwes, averagePay);
 
     return 0;
 }
@@ -149,7 +142,7 @@ Person& Person::operator-(double avgPay) {
     return *this;
 }
 
-Person& Person::operator-=(double avgPay){
+Person& Person::operator-=(double avgPay) {
     amountOwed = amountPaid - avgPay;
     return *this;
 }
@@ -251,25 +244,6 @@ void LList<T>::insertAtEnd(T newData) {
     size = size + 1;
 }
 
-template<class T>
-void LList<T>::calOwed(const double& avgPay) { //i either update the member variables of the data or i create new data
-    //iterates through the list updating the amountOwed for each object
-    //using the overloaded '-' operator
-    //those who paid more than the avg will be postive 
-    //those who paid less than the avs will be negative
-    if (!list.isEmpty()) {
-        LListNode<T>* iter = head;
-        while (iter != nullptr) {
-            double amountOwed = iter->data.amountPaid - avgPay;
-            iter->getData().setAmountOwed(amountOwed);
-            std::cout << iter->getData().getAmountOwed() << std::endl;
-            iter = iter->getNext();
-        }
-        return;
-    }
-    std::cout << "The list is empty." << std::endl;
-}
-
 ///////////////////// General Function Definitions ///////////////////////
 void openInputFile(std::ifstream& inputFile) {
     std::string  filename;
@@ -285,8 +259,7 @@ void openInputFile(std::ifstream& inputFile) {
     }
 }
 
-template<class T>
-void readInputFile(LList<T>& personList) {
+void readInputFile(LList<Person>& personList) {
     std::ifstream inputFile;
     openInputFile(inputFile);
     Person tempPerson;
@@ -299,10 +272,9 @@ void readInputFile(LList<T>& personList) {
     }
 }
 
-template<class T>
-void avgPay(const LList<T>& list, double& avgPay) {
+void avgPay(const LList<Person>& list, double& avgPay) {
     if (!list.isEmpty()) {
-        LListNode<T>* iter = list.getHead();
+        LListNode<Person>* iter = list.getHead();
         while (iter != nullptr) {
             avgPay += iter->getData();
             iter = iter->getNext();
@@ -313,31 +285,32 @@ void avgPay(const LList<T>& list, double& avgPay) {
     std::cout << "The list is empty." << std::endl;
 }
 
-/*template<class T>
-void calOwed(const LList<T>& list, const double& avgPay) {
+
+void calOwed(const LList<Person>& list, const double& avgPay) {
     //iterates through the list updating the amountOwed for each object
     //using the overloaded '-' operator
-    //those who paid more than the avg will be postive 
+    //those who paid more than the avg will be postive
     //those who paid less than the avs will be negative
     if (!list.isEmpty()) {
-        LListNode<T>* iter = list.getHead();
+        LListNode<Person>* iter = list.getHead();
         while (iter != nullptr) {
+            Person tempPerson = iter->getData();
             double amountOwed = iter->getData().getAmountPaid() - avgPay;
-            iter->getData().setAmountOwed(amountOwed);
-            std::cout << iter->getData().getAmountOwed() << std::endl;
+            tempPerson.setAmountOwed(amountOwed);
+            iter->setData(tempPerson);
             iter = iter->getNext();
         }
         return;
     }
     std::cout << "The list is empty." << std::endl;
-}*/
+}
 
-/*template<class T>
-void createListVec(const LList<T>& list, std::vector<T>& listVec) {
+
+void createListVec(const LList<Person>& list, std::vector<Person>& listVec) {
     //will iterate through the list and take Person objects and store them
-    //in a new vector,those who paid more than the avg, who are owed, will be postive 
+    //in a new vector,those who paid more than the avg, who are owed, will be postive
     if (!list.isEmpty()) {
-        LListNode<T>* iter = list.getHead();
+        LListNode<Person>* iter = list.getHead();
         while (iter != nullptr) {
             Person tempPerson = iter->getData();
             listVec.push_back(tempPerson);
@@ -346,7 +319,7 @@ void createListVec(const LList<T>& list, std::vector<T>& listVec) {
         return;
     }
     std::cout << "The list is empty." << std::endl;
-    
+
 }
 
 
@@ -363,7 +336,7 @@ void categorizePeople(const std::vector<Person>& listVec, std::vector<Person>& v
 
     vecOwed.clear();
     vecOwes.clear();
-    
+
     for (const Person& person : listVec) {
         double amountOwed = person.getAmountOwed();
         if ( amountOwed >= 0) {
@@ -374,10 +347,11 @@ void categorizePeople(const std::vector<Person>& listVec, std::vector<Person>& v
             vecOwes.push_back(person);
         }
     }
-    
+
 }
 
 void printPayArrang(std::vector<Person> vecOwed, std::vector<Person> vecOwes, double avgPay) {
+    //this outputs values in nomral dollar notaion, but some money may be "lossed" due to rounding
     for (Person& personOwed : vecOwed) {
         double amountOwed = personOwed.getAmountOwed();
         if (personOwed.getAmountOwed() == 0) {
@@ -401,11 +375,11 @@ void printPayArrang(std::vector<Person> vecOwed, std::vector<Person> vecOwes, do
                 personOwes.setAmountOwed(0);
             }
             std::cout << personOwes.getName() << ", you give " << personOwed.getName() <<
-                " $" << std::showpoint << std::setprecision(2) << additionalAmountPaid << std::endl;
+                " $" << std::fixed <<std::showpoint << std::setprecision(2) << additionalAmountPaid << std::endl;
             if (personOwed.getAmountOwed() == 0) {
                 break;
             }
         }
     }
-    std::cout << "In the end, you should all have spent around $" << std::showpoint << std::setprecision(4) << avgPay << std::endl;
-}*/
+    std::cout << "In the end, you should all have spent around $" << std::fixed  << std::showpoint << std::setprecision(2) << avgPay << std::endl;
+}
