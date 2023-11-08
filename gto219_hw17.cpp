@@ -126,7 +126,7 @@ void RBT<T>::doubleCR(RBTNode<T>*& point) {
 }
 
 template <class T>
-void RBT<T>::singleCR(RBTNode<T>*& point) { 
+void RBT<T>::singleCR(RBTNode<T>*& point) {
     RBTNode<T>* grandparent = point;
     RBTNode<T>* parent = point->left;
     // TODO: ADD ROTATION CODE HERE
@@ -135,7 +135,7 @@ void RBT<T>::singleCR(RBTNode<T>*& point) {
     if (grandparent->left != nullptr) {
         grandparent->left->parent = grandparent; //it is not certain whether the parent->right is nullptr or not
     }
-    
+
     if (grandparent->parent == nullptr) {
         parent->parent = nullptr;
         root = parent;
@@ -204,8 +204,123 @@ void RBT<T>::insert(const T& toInsert, RBTNode<T>*& point, RBTNode<T>* parent) {
 
         RBTNode<T>* curr_node = point; // curr_node will be set appropriately when walking up the tree
         // TODO: ADD RBT RULES HERE
+        if (parent == nullptr) {
+            swapColor(point);
+            //root = point; dont need this line of code because when this code is called in the driver it takes root as the point parameter
+            return;
+        }
+        if (getColor(parent) == BLACK) { 
+            return;
+        }
+        else {
+            RBTNode<T>* uncle;
+            RBTNode<T>* grandparent = parent->parent;
+            if (parent == grandparent->left) {
+                uncle = grandparent->right;
+            }
+            else {
+                uncle = grandparent->left;
+            }
+            if (getColor(uncle) == RED) {
+                swapColor(grandparent); //should swap grandparent to red
+                swapColor(parent); //should swap parent to black 
+                swapColor(uncle); //should swap uncle to black
+                if (grandparent == root) {
+                    swapColor(grandparent);
+                }
+                RBTNode<T>* greatgrandparent = grandparent->parent;
+                if (getColor(greatgrandparent) == RED) {//checks to see if a red parent-red child relationship exists after swaping all the colors in this subtree
+                    //this will only be possible if grandparent is not the root so it is red after the above color swaps
+                    //due to the structure of the insertion if there is a greatgrandparent whose color is red then it will definitely have a parent
+                    //this is true because if the greatgrandparent did not have a parent, i.e., it would be the root, and the root is always black so this code
+                    //would not run
+                    RBTNode<T>* greatgreatgrandparent;
+                    //the colors have been changed due to the code above so i need to recheck the parent-uncle color relationship to follow the implementation rules
+                    while (getColor(grandparent) == RED && getColor(greatgrandparent) == RED) {
+                        greatgreatgrandparent = greatgrandparent->parent;
+                        if (grandparent == greatgrandparent->left && greatgrandparent == greatgreatgrandparent->left) {
+                            if (getColor(greatgreatgrandparent->right) == BLACK) {
+                                singleCR(greatgreatgrandparent);
+                            }
+                            else {
+                                swapColor(greatgreatgrandparent); //should swap greatgreatgrandparent to red
+                                swapColor(greatgrandparent); //should swap greatgrandparent to black 
+                                swapColor(greatgreatgrandparent->right); //should swap greatgranduncle to black
+                                if (greatgreatgrandparent == root) {
+                                    swapColor(greatgreatgrandparent);
+                                }
+                            }
+
+                        }
+                        else if (grandparent == greatgrandparent->right && greatgrandparent == greatgreatgrandparent->right) {
+                            if (getColor(greatgreatgrandparent->left) == BLACK) {
+                                singleCCR(greatgreatgrandparent);
+                            }
+                            else {
+                                swapColor(greatgreatgrandparent); //should swap greatgreatgrandparent to red
+                                swapColor(greatgrandparent); //should swap greatgrandparent to black 
+                                swapColor(greatgreatgrandparent->left); //should swap greatgranduncle to black
+                                if (greatgreatgrandparent == root) {
+                                    swapColor(greatgreatgrandparent);
+                                }
+                            }
+                        }
+                        else if (grandparent == greatgrandparent->right && greatgrandparent == greatgreatgrandparent->left) {
+                            if (getColor(greatgreatgrandparent->right) == BLACK) {
+                                doubleCR(greatgreatgrandparent);
+                            }
+                            else {
+                                swapColor(greatgreatgrandparent); //should swap greatgreatgrandparent to red
+                                swapColor(greatgrandparent); //should swap greatgrandparent to black 
+                                swapColor(greatgreatgrandparent->right); //should swap greatgranduncle to black
+                                if (greatgreatgrandparent == root) {
+                                    swapColor(greatgreatgrandparent);
+                                }
+                            }
+                        }
+                        else if (grandparent == greatgrandparent->left && greatgrandparent == greatgreatgrandparent->right) {
+                            if (getColor(greatgreatgrandparent->left) == BLACK) {
+                                doubleCCR(greatgreatgrandparent);
+                            }
+                            else {
+                                swapColor(greatgreatgrandparent); //should swap greatgreatgrandparent to red
+                                swapColor(greatgrandparent); //should swap greatgrandparent to black 
+                                swapColor(greatgreatgrandparent->left); //should swap greatgranduncle to black
+                                if (greatgreatgrandparent == root) {
+                                    swapColor(greatgreatgrandparent);
+                                }
+                            }
+
+                        }
+                        grandparent = greatgreatgrandparent;
+                        if (getColor(grandparent) == BLACK) {
+                            break;
+                        }
+                        greatgrandparent = greatgreatgrandparent->parent;
+                    }
+                    
+                }
+            }
+            else {
+                if (point == parent->left && parent == grandparent->left) {
+                    singleCR(grandparent);
+                }
+                else if (point == parent->right && parent == grandparent->right) {
+                    singleCCR(grandparent);
+                }
+                else if (point == parent->right && parent == grandparent->left) {
+                    doubleCR(grandparent);
+                }
+                else if (point == parent->left && parent == grandparent->right) {
+                    doubleCCR(grandparent);
+                }
+            }
+
+        }
     }
     else if (toInsert < point->data) { // recurse down the tree to left to find correct leaf location
+        //i can either add code here to check if child and parent node are both red and then do a rotation...but then i will need 
+        //to keep track of what "point" is as we are going down the tree...sound kinda annoying
         insert(toInsert, point->left, point);
     }
     else { // recurse down the tree to right to find correct leaf location
