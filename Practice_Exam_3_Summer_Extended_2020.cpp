@@ -86,6 +86,36 @@ int numIncorrectConnections(BSTNode* root) { //this code is bad
         
 }
 
+or other option for Question 10
+template<class T>
+bool isCorrect(BSTNode<T>* node){
+    if(node == nullptr){
+    return true;
+    }
+    bool leftCorrect = isCorrect(node->left);
+    bool rightCorrec = isCorrect(node->right);
+
+    if(node->left != nullptr && node->left->parent != node){
+        leftCorrect = false;
+    }
+    if(node->right != nullptr && node->right->parent != node){
+        rightCorrect = false;
+    }
+    if(!leftCorrect || !rightCorrect){
+        return false;
+    }
+    return true;
+}
+    
+    
+    
+
+
+}
+
+
+
+
 //Question 11
 
 class Node {
